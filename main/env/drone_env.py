@@ -1,21 +1,153 @@
 import numpy as np
 from PIL import Image
 import cv2
-import matplotlib.pyplot as plt
-import pickle
-from matplotlib import style
-import time
 
-#Define Parameters
 SIZE_Y = 40*2
 SIZE_X = 60*2
-ENV_COLOR = (20, 52, 89)
-WALLS_COLOR = (77, 77, 234)
-DRONE_COLOR = (234, 222, 53)
-TARGET_COLOR = (132, 234, 53)
 
 #Define Functions and Classes
-def createLine(walls):
+class EnvObject:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __str__(self):
+        return f"{self.x}, {self.y}"
+    
+    def __sub__(self, other):
+        return (self.x - other.x, self.y - other.y)
+    
+    def __eq__(self, other):
+        return self.x == other.x and self.y == other.y
+    
+class Drone(EnvObject):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+        
+    def action(self, choice):
+        '''
+        Gives us 9 total movement options. (0,1,2,3,4,5,6,7,8)
+        '''
+        if choice == 0:
+            self.move(x=1, y=1)
+        elif choice == 1:
+            self.move(x=-1, y=-1)
+        elif choice == 2:
+            self.move(x=-1, y=1)
+        elif choice == 3:
+            self.move(x=1, y=-1)
+
+        elif choice == 4:
+            self.move(x=1, y=0)
+        elif choice == 5:
+            self.move(x=-1, y=0)
+
+        elif choice == 6:
+            self.move(x=0, y=1)
+        elif choice == 7:
+            self.move(x=0, y=-1)
+
+        elif choice == 8:
+            self.move(x=0, y=0)
+
+    def move(self, x=False, y=False):
+
+        # If no value for x, move randomly
+        if not x:
+            self.x += np.random.randint(-1, 2)
+        else:
+            self.x += x
+
+        # If no value for y, move randomly
+        if not y:
+            self.y += np.random.randint(-1, 2)
+        else:
+            self.y += y
+
+
+        # If we are out of bounds, fix!
+        if self.x < 0:
+            self.x = 0
+        elif self.x > SIZE_X-1:
+            self.x = SIZE_X-1
+        if self.y < 0:
+            self.y = 0
+        elif self.y > SIZE_Y-1:
+            self.y = SIZE_Y-1
+
+class Target(EnvObject):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+
+class DroneEnv:
+    #Define Parameters
+    SIZE_Y = 40*2
+    SIZE_X = 60*2
+    ENV_COLOR = (20, 52, 89)
+    WALLS_COLOR = (77, 77, 234)
+    DRONE_COLOR = (234, 222, 53)
+    TARGET_COLOR = (132, 234, 53)
+    space = np.zeros((SIZE_Y, SIZE_X, 3), dtype=np.uint8) 
+    walls = np.zeros((SIZE_Y, SIZE_X), dtype=np.uint8)
+    walls = createLine(walls, SIZE_Y, SIZE_X)
+
+
+    def initial(self):
+        self.agent_1 = Drone(self.SIZE_X-self.SIZE_X//11, self.SIZE_Y//10)
+        self.agent_2 = Drone(self.SIZE_X-self.SIZE_X//20, self.SIZE_Y//2-self.SIZE_Y//20)
+        self.agent_3 = Drone(self.SIZE_X-self.SIZE_X//13, self.SIZE_Y-self.SIZE_Y//11)
+        self.target = Target(self.SIZE_X//10, self.SIZE_Y//2-self.SIZE_Y//20)
+        
+        self.episode_step = 0
+        # observation = (self.agent_1.x - self.target.x) + (self.agent_1.y - self.target.y) + np.sqrt((self.agent_1.x - self.target.x)**2 + (self.agent_1.y - self.target.y)**2)
+        observation = np.array([self.agent_1.x - self.target.x, self.agent_1.y - self.target.y, np.sqrt((self.agent_1.x - self.target.x)**2 + (self.agent_1.y - self.target.y)**2)])
+        
+        return observation
+    
+    def step(self, action, observation):
+        self.episode_step += 1
+        self.agent_1.action(action)
+        
+        new_observation = np.array([self.agent_1.x - self.target.x, self.agent_1.y - self.target.y, np.sqrt((self.agent_1.x - self.target.x)**2 + (self.agent_1.y - self.target.y)**2)])
+        
+        if self.agent_1 == self.target:
+            reward = 100
+            done = True
+        elif self.episode_step >= 200:
+            reward = -10
+            done = True
+        elif new_observation[2] < observation[2]:
+            reward = 1
+            done = False
+        elif new_observation[2] > observation[2]:
+            reward = -1
+            done = False
+            
+        return new_observation, reward, done
+        
+    def is_wall(self, action):
+            if self.walls[self.agent_1.y+action.y][self.agent_1.x+action.x] == 1:
+                return True
+    
+    def visualize(self):
+        for i in range(self.SIZE_Y):
+            for j in range(self.SIZE_X):
+                if self.walls[i][j] == 1:
+                    self.space[i][j] = self.WALLS_COLOR
+                else:
+                    self.space[i][j] = self.ENV_COLOR
+
+        self.space[self.agent_1.y][self.agent_1.x] = self.DRONE_COLOR
+        self.space[self.target.y][self.target.x] = self.TARGET_COLOR
+        
+    def render(self):
+        img = Image.fromarray(self.space, 'RGB')
+        img = img.resize((1200, 800), resample = Image.Resampling.BOX)
+        cv2.imshow("image", np.array(img))  # show it!
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+
+def createLine(walls, SIZE_Y, SIZE_X):
     #Full Horizontal Line
     # for i in range(SIZE_X):
     #     walls[int(SIZE_Y/2),int(i)] = 1
@@ -95,86 +227,8 @@ def createLine(walls):
     #Segment 18
     for i in range(SIZE_Y//2+SIZE_Y//10+SIZE_Y//3, SIZE_Y):
         walls[i, SIZE_X-SIZE_X//9] = 1
-
-class EnvObject:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-
-    def __str__(self):
-        return f"{self.x}, {self.y}"
     
-    def __sub__(self, other):
-        return (self.x - other.x, self.y - other.y)
-    
-class Drone(EnvObject):
-    def __init__(self, x, y):
-        super().__init__(x, y)
-        
-    def action(self, choice):
-        '''
-        Gives us 4 total movement options. (0,1,2,3)
-        '''
-        if choice == 0:
-            self.move(x=1, y=1)
-        elif choice == 1:
-            self.move(x=-1, y=-1)
-        elif choice == 2:
-            self.move(x=-1, y=1)
-        elif choice == 3:
-            self.move(x=1, y=-1)
+    return walls
 
-    def move(self, x=False, y=False):
-
-        # If no value for x, move randomly
-        if not x:
-            self.x += np.random.randint(-1, 2)
-        else:
-            self.x += x
-
-        # If no value for y, move randomly
-        if not y:
-            self.y += np.random.randint(-1, 2)
-        else:
-            self.y += y
-
-
-        # If we are out of bounds, fix!
-        if self.x < 0:
-            self.x = 0
-        elif self.x > SIZE_Y-1:
-            self.x = SIZE_Y-1
-        if self.y < 0:
-            self.y = 0
-        elif self.y > SIZE_Y-1:
-            self.y = SIZE_Y-1
-
-class Target(EnvObject):
-    def __init__(self, x, y):
-        super().__init__(x, y)
-
-#Create Objects
-agent_1 = Drone(SIZE_X-SIZE_X//11, SIZE_Y//10)
-agent_2 = Drone(SIZE_X-SIZE_X//20, SIZE_Y//2-SIZE_Y//20)
-agent_3 = Drone(SIZE_X-SIZE_X//13, SIZE_Y-SIZE_Y//11)
-target = Target(SIZE_X//10, SIZE_Y//2-SIZE_Y//20)
-
-#Create Environment and Walls
-env = np.zeros((SIZE_Y, SIZE_X, 3), dtype=np.uint8)  # starts an rbg of our size
-walls = np.zeros((SIZE_Y, SIZE_X), dtype=np.uint8)
-createLine(walls)
-
-#Color the Walls and Environment
-for i in range(SIZE_Y):
-    for j in range(SIZE_X):
-        if walls[i][j] == 1:
-            env[i][j] = WALLS_COLOR
-        else:
-            env[i][j] = ENV_COLOR
-
-#Color the Objects  
-env[agent_1.y][agent_1.x] = DRONE_COLOR
-env[agent_2.y][agent_2.x] = DRONE_COLOR
-env[agent_3.y][agent_3.x] = DRONE_COLOR
-env[target.y][target.x] = TARGET_COLOR
-
+#crete the environment
+env = DroneEnv()

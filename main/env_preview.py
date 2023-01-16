@@ -3,9 +3,10 @@ import cv2
 from PIL import Image
 from env.drone_env import env
 
-#Show Environment
-img = Image.fromarray(env, 'RGB')
-img = img.resize((1200, 800), resample = Image.Resampling.BOX)
-cv2.imshow("image", np.array(img))  # show it!
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+
+print(env.initial())
+observation = env.initial()
+# next_state, reward, done = env.step(1, observation)
+# print(next_state, reward, done)
+env.visualize()
+env.render()
