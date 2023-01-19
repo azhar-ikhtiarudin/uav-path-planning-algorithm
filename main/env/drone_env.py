@@ -6,6 +6,90 @@ SIZE_Y = 40*2
 SIZE_X = 60*2
 
 #Define Functions and Classes
+
+def createLine(walls, SIZE_Y, SIZE_X):
+    #Full Horizontal Line
+    # for i in range(SIZE_X):
+    #     walls[int(SIZE_Y/2),int(i)] = 1
+        
+    #Full Vertical Line
+    # for i in range(SIZE_Y):
+        # walls[int(i), int(SIZE_X/2)] = 1
+
+    #Segment 1
+    for i in range(SIZE_Y//10, SIZE_Y//3):
+        walls[i, SIZE_X//2] = 1
+
+    #Segment 2
+    for i in range(SIZE_X//2, SIZE_X//2+SIZE_X//6):
+        walls[SIZE_Y//10, i] = 1
+
+    #Segment 3
+    for i in range(SIZE_Y//10, SIZE_Y//4):
+        walls[i, SIZE_X//2+SIZE_X//6] = 1
+
+    #Segment 4
+    for i in range(SIZE_X//2-SIZE_X//6, SIZE_X//2+1):
+        walls[SIZE_Y//3, i] = 1
+
+    #Segment 5
+    for i in range(SIZE_Y//3, SIZE_Y//3+SIZE_Y//4):
+        walls[i, SIZE_X//2-SIZE_X//6] = 1
+
+    #Segment 6
+    for i in range(SIZE_X//2-SIZE_X//6, SIZE_X//2+SIZE_X//6):
+        walls[SIZE_Y//3+SIZE_Y//4, i] = 1
+        
+    #Segment 7
+    for i in range(SIZE_Y//3+SIZE_Y//4, SIZE_Y//3+SIZE_Y//4+SIZE_Y//5):
+        walls[i, SIZE_X//2+SIZE_X//6] = 1
+
+    #Segment 8
+    for i in range(SIZE_X//2+SIZE_X//6, SIZE_X//2+SIZE_X//6+SIZE_X//6):
+        walls[SIZE_Y//3+SIZE_Y//4+SIZE_Y//5, i] = 1
+
+    #Segment 9
+    for i in range(SIZE_Y-SIZE_Y//3, SIZE_Y):
+        walls[i, SIZE_X//2] = 1
+        
+    #Segment 10
+    for i in range(SIZE_Y-SIZE_Y//4, SIZE_Y):
+        walls[i, SIZE_X//2-SIZE_X//4] = 1
+
+    #Segment 11
+    for i in range(0, SIZE_X//6):
+        walls[SIZE_Y//5, i] = 1
+
+    #Segment 12
+    for i in range(SIZE_Y//5, SIZE_Y//5+SIZE_Y//5):
+        walls[i, SIZE_X//6] = 1
+
+    #Segment 13
+    for i in range(0, SIZE_X//6):
+        walls[SIZE_Y//5+SIZE_Y//3, i] = 1
+        
+    #Segment 14
+    for i in range(0, SIZE_Y//3):
+        walls[i, SIZE_X-SIZE_X//6] = 1
+
+    #Segment 15
+    for i in range(SIZE_X-SIZE_X//10, SIZE_X):
+        walls[SIZE_Y//3, i] = 1
+
+    #Segment 16
+    for i in range(SIZE_X-SIZE_X//9, SIZE_X):
+        walls[SIZE_Y//2+SIZE_Y//10, i] = 1
+
+    #Segment 17
+    for i in range(SIZE_Y//2+SIZE_Y//10, SIZE_Y//2+SIZE_Y//10+SIZE_Y//4):
+        walls[i, SIZE_X-SIZE_X//9] = 1
+        
+    #Segment 18
+    for i in range(SIZE_Y//2+SIZE_Y//10+SIZE_Y//3, SIZE_Y):
+        walls[i, SIZE_X-SIZE_X//9] = 1
+    
+    return walls
+
 class EnvObject:
     def __init__(self, x, y):
         self.x = x
@@ -126,7 +210,7 @@ class DroneEnv:
         return new_observation, reward, done
         
     def is_wall(self, action):
-            if self.walls[self.agent_1.y+action.y][self.agent_1.x+action.x] == 1:
+            if self.walls[self.agent_1.y+action][self.agent_1.x+action] == 1:
                 return True
     
     def visualize(self):
@@ -146,89 +230,6 @@ class DroneEnv:
         cv2.imshow("image", np.array(img))  # show it!
         cv2.waitKey(0)
         cv2.destroyAllWindows()
-
-def createLine(walls, SIZE_Y, SIZE_X):
-    #Full Horizontal Line
-    # for i in range(SIZE_X):
-    #     walls[int(SIZE_Y/2),int(i)] = 1
-        
-    #Full Vertical Line
-    # for i in range(SIZE_Y):
-        # walls[int(i), int(SIZE_X/2)] = 1
-
-    #Segment 1
-    for i in range(SIZE_Y//10, SIZE_Y//3):
-        walls[i, SIZE_X//2] = 1
-
-    #Segment 2
-    for i in range(SIZE_X//2, SIZE_X//2+SIZE_X//6):
-        walls[SIZE_Y//10, i] = 1
-
-    #Segment 3
-    for i in range(SIZE_Y//10, SIZE_Y//4):
-        walls[i, SIZE_X//2+SIZE_X//6] = 1
-
-    #Segment 4
-    for i in range(SIZE_X//2-SIZE_X//6, SIZE_X//2+1):
-        walls[SIZE_Y//3, i] = 1
-
-    #Segment 5
-    for i in range(SIZE_Y//3, SIZE_Y//3+SIZE_Y//4):
-        walls[i, SIZE_X//2-SIZE_X//6] = 1
-
-    #Segment 6
-    for i in range(SIZE_X//2-SIZE_X//6, SIZE_X//2+SIZE_X//6):
-        walls[SIZE_Y//3+SIZE_Y//4, i] = 1
-        
-    #Segment 7
-    for i in range(SIZE_Y//3+SIZE_Y//4, SIZE_Y//3+SIZE_Y//4+SIZE_Y//5):
-        walls[i, SIZE_X//2+SIZE_X//6] = 1
-
-    #Segment 8
-    for i in range(SIZE_X//2+SIZE_X//6, SIZE_X//2+SIZE_X//6+SIZE_X//6):
-        walls[SIZE_Y//3+SIZE_Y//4+SIZE_Y//5, i] = 1
-
-    #Segment 9
-    for i in range(SIZE_Y-SIZE_Y//3, SIZE_Y):
-        walls[i, SIZE_X//2] = 1
-        
-    #Segment 10
-    for i in range(SIZE_Y-SIZE_Y//4, SIZE_Y):
-        walls[i, SIZE_X//2-SIZE_X//4] = 1
-
-    #Segment 11
-    for i in range(0, SIZE_X//6):
-        walls[SIZE_Y//5, i] = 1
-
-    #Segment 12
-    for i in range(SIZE_Y//5, SIZE_Y//5+SIZE_Y//5):
-        walls[i, SIZE_X//6] = 1
-
-    #Segment 13
-    for i in range(0, SIZE_X//6):
-        walls[SIZE_Y//5+SIZE_Y//3, i] = 1
-        
-    #Segment 14
-    for i in range(0, SIZE_Y//3):
-        walls[i, SIZE_X-SIZE_X//6] = 1
-
-    #Segment 15
-    for i in range(SIZE_X-SIZE_X//10, SIZE_X):
-        walls[SIZE_Y//3, i] = 1
-
-    #Segment 16
-    for i in range(SIZE_X-SIZE_X//9, SIZE_X):
-        walls[SIZE_Y//2+SIZE_Y//10, i] = 1
-
-    #Segment 17
-    for i in range(SIZE_Y//2+SIZE_Y//10, SIZE_Y//2+SIZE_Y//10+SIZE_Y//4):
-        walls[i, SIZE_X-SIZE_X//9] = 1
-        
-    #Segment 18
-    for i in range(SIZE_Y//2+SIZE_Y//10+SIZE_Y//3, SIZE_Y):
-        walls[i, SIZE_X-SIZE_X//9] = 1
-    
-    return walls
 
 #crete the environment
 env = DroneEnv()
