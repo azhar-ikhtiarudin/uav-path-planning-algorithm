@@ -17,7 +17,9 @@ MODEL_NAME = '2x256'
 MIN_REWARD = -200  # For model save
 
 # Environment settings
-EPISODES = 20
+####################################################
+EPISODES = 2000 
+####################################################
 
 # Exploration settings
 epsilon = 1  # not a constant, going to be decayed

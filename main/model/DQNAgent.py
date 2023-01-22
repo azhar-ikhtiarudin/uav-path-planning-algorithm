@@ -27,12 +27,12 @@ STATE_SIZE = 3
 ACTION_SIZE = 9
 DISCOUNT = 0.99
 
-
-REPLAY_MEMORY_SIZE = 10 # How many last steps to keep for model training
-MIN_REPLAY_MEMORY_SIZE = 2
-MINIBATCH_SIZE = 2  # How many steps (samples) to use for training
-UPDATE_TARGET_EVERY = 3  # Terminal states (end of episodes)
-
+####################################################
+REPLAY_MEMORY_SIZE = 5000 # How many last steps to keep for model training
+MIN_REPLAY_MEMORY_SIZE = 100
+MINIBATCH_SIZE = 10  # How many steps (samples) to use for training
+UPDATE_TARGET_EVERY = 5  # Terminal states (end of episodes)
+####################################################
 
 MODEL_NAME = '2x256'
 MIN_REWARD = -200  # For model save

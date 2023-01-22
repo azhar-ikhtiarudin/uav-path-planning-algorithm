@@ -6,7 +6,7 @@ import PIL
 
 SIZE_Y = 40*2
 SIZE_X = 60*2
-MAX_STEP = 100
+MAX_STEP = 1500
 # Define Functions and Classes
 
 
