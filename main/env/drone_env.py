@@ -163,6 +163,34 @@ class Drone(EnvObject):
         elif self.y > SIZE_Y-1:
             self.y = SIZE_Y-1
 
+    def collisionCheck(self, x=0, y=0, walls=None):
+        # checking for out of bounds
+        predict_x = self.x + x
+        predict_y = self.y + y
+        if predict_x < 0 or predict_x > SIZE_X-1:
+            x = 0
+        if predict_y < 0 or predict_y > SIZE_Y-1:
+            y = 0
+
+        # Check for collision with walls
+        if walls is None:
+            return x, y
+        elif walls[self.y+y][self.x+x] == 1:
+            return 0, 0
+        else:
+            return x, y
+
+        # # Several edge cases exist so we'll implement a simpler system
+        # for i in range(np.sign(x), x + np.sign(x), np.sign(x)):
+        #     if walls[self.y][self.x+i] == 1:
+        #         x = i - np.sign(x)
+        #         break
+
+        # for j in range(np.sign(y), y + np.sign(y), np.sign(y)):
+        #     if walls[self.y+j][self.x] == 1:
+        #         y = i - np.sign(y)
+        #         break
+
 
 class Target(EnvObject):
     def __init__(self, x, y):
@@ -197,7 +225,7 @@ class DroneEnv:
 
     def step(self, action, observation):
         reward = 0
-        done= False
+        done = False
         self.episode_step += 1
         self.agent_1.action(action)
 
@@ -219,10 +247,6 @@ class DroneEnv:
 
         return new_observation, reward, done
 
-    def is_wall(self, action):
-        if self.walls[self.agent_1.y+action][self.agent_1.x+action] == 1:
-            return True
-
     def visualize(self):
         for i in range(self.SIZE_Y):
             for j in range(self.SIZE_X):
@@ -242,16 +266,13 @@ class DroneEnv:
         cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-    def saveImage(self, episode='e', step='s'):
+    def saveImage(self, image_path, episode='e', step='s'):
         self.visualize()
-        if not os.path.isdir('images'):
-            os.makedirs('images')
+        if not os.path.isdir(image_path):
+            os.makedirs(image_path)
 
         img = Image.fromarray(self.space, 'RGB')
-        img = img.resize((1200, 800), resample=Image.Resampling.BOX)
+        # img = img.resize((1200, 800), resample=Image.Resampling.BOX)
         img_rgb = img.convert('RGB')
-        img_rgb = img_rgb.save(f'images/episode_{episode}/image_{episode}_{step}.png')
-        
-
-    def test(self):
-        print('test')
+        img_rgb = img_rgb.save(
+            f'{image_path}/episode_{episode}/image_{episode}_{step}.png')
